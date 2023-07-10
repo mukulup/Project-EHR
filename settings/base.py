@@ -9,15 +9,39 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
+import json
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CUR_DIR = os.path.abspath(os.path.dirname(__file__))
+PROJECT_DIR = os.path.dirname(CUR_DIR)
+STATIC_DIR = os.path.join(PROJECT_DIR, "static")
+TEMPLATES_DIR = os.path.join(PROJECT_DIR, "templates")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
+
+try:
+    SETTINGS_FILE = "%s/settings.json" % CUR_DIR
+    with open(SETTINGS_FILE) as fp:
+        production_settings = json.load(fp)
+except Exception as e:
+    production_settings = {}
+
+
+def read_setting(name, default=None):
+    """Read production settings from a separate file managed on the server"""
+    try:
+        return production_settings[name]
+    except KeyError:
+        # print "%s:'%s'" % (name, default)
+        if default is not None:
+            return default
+        raise Exception("Setting %s not found in settings.json" % name)
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-)j)dimii&jv4^ciq%59ean_*$#r6u$_k!+a#+b6omrg64_ko+z'
@@ -37,7 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
+    'app.accounts',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +79,7 @@ ROOT_URLCONF = 'EHR.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR + '/templates/',],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,7 +101,7 @@ WSGI_APPLICATION = 'EHR.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': 'db.sqlite3',
     }
 }
 
@@ -118,9 +142,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+# Media Files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
