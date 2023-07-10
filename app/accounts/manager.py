@@ -52,7 +52,7 @@ class UserManager(BaseUserManager):
 class PasswordResetCodeManager(models.Manager):
     def create_reset_code(self, user):
         """
-        Create the password reset code for non-registered user who comes first time to `renewbuy.com`.
+        Create the password reset code for non-registered user who comes first time
         Create  Django's cryptographic signing API to generate one-time secret URLs for password resets
         """
         password_reset_code = self.filter(user=user).order_by("-created_at")
